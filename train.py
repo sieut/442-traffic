@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 
 import cv2
@@ -17,6 +18,7 @@ from dataset import TrafficDataset
 
 
 N_CLASS = 2
+OUT_FILE = None
 
 
 class Net(nn.Module):
@@ -83,6 +85,9 @@ def train(trainloader, net, criterion, optimizer, device, epoch):
     end = time.time()
     print('[epoch %d] loss: %.3f elapsed time %.3f' %
           (epoch, running_loss, end-start))
+    global OUT_FILE
+    OUT_FILE.write('[epoch %d] loss: %.3f elapsed time %.3f\n' %
+          (epoch, running_loss, end-start))
 
 
 def test(testloader, net, criterion, device):
@@ -101,6 +106,8 @@ def test(testloader, net, criterion, device):
             losses += loss.item()
             cnt += 1
     print(losses / cnt)
+    global OUT_FILE
+    OUT_FILE.write("%s\n" % (losses / cnt))
     return (losses/cnt)
 
 
@@ -124,10 +131,12 @@ def calc_score(loader, net, device):
 
     score = correct.item() / cnt
     print(score)
+    global OUT_FILE
+    OUT_FILE.write("%s\n" % score)
     return score
 
 
-def main():
+def main(argv):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device: %s" % device)
 
@@ -138,6 +147,9 @@ def main():
     net = Net().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), 1e-3, weight_decay=1e-5)
+
+    global OUT_FILE
+    OUT_FILE = open("train_out", "w")
 
     print('\nStart training')
     for epoch in range(10):
@@ -161,4 +173,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
