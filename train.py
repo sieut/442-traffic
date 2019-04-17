@@ -104,6 +104,23 @@ def calc_loss(output, labels, criterion):
     return criterion(output, labels)
 
 
+def calc_score(loader, net, device):
+    correct = 0
+    cnt = 0
+    with torch.no_grad():
+        net = net.eval()
+        for images, labels in tqdm(loader):
+            images = images.to(device)
+            labels = labels.view(labels.size(0))
+            output = net(images).cpu()
+            correct += torch.sum(np.argmax(output, axis=1) == labels)
+            cnt += images.size(0)
+
+    score = correct.item() / cnt
+    print(score)
+    return score
+
+
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device: %s" % device)
@@ -125,9 +142,14 @@ def main():
         train(train_loader, net, criterion, optimizer, device, epoch+1)
         test(test_loader, net, criterion, device)
 
-    print('\nFinished Training, Testing on test set')
+    train_and_test_loader = DataLoader(train_and_test_data, batch_size=1)
     eval_loader = DataLoader(eval_data, batch_size=1)
+    print('\nFinished Training, Testing on test set')
     test(eval_loader, net, criterion, device)
+    print('\nCalculating score on train and test set')
+    calc_score(train_and_test_loader, net, device)
+    print('\nCalculating score on eval set')
+    calc_score(eval_loader, net, device)
 
     torch.save(net.state_dict(), './models/model_{}.pth'.format(name))
 
