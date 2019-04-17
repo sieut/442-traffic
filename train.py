@@ -27,20 +27,26 @@ class Net(nn.Module):
             nn.Conv2d(3, 128, 3),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(3),
-            nn.Dropout(),
+            nn.MaxPool2d(2, stride=2),
+
+            nn.Conv2d(128, 128, 3),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 128, 3),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, stride=2),
 
             nn.Conv2d(128, 512, 3),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(3),
-            nn.Dropout(),
-
             nn.Conv2d(512, 512, 3),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(3),
-            nn.Dropout(),
+            nn.Conv2d(512, 512, 3),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, stride=2),
         )
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
         self.linear_layers = nn.Sequential(
@@ -128,7 +134,7 @@ def main():
     dataset = TrafficDataset(size=2639)
     train_and_test_data, eval_data = dataset.split(ratio=0.9)
 
-    name = 'net_1'
+    name = 'net_2'
     net = Net().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), 1e-3, weight_decay=1e-5)
