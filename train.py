@@ -27,16 +27,27 @@ class Net(nn.Module):
             nn.Conv2d(3, 128, 3),
             nn.BatchNorm2d(128),
             nn.ReLU(inplace=True),
+            nn.MaxPool2d(3),
             nn.Dropout(),
 
             nn.Conv2d(128, 512, 3),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
+            nn.MaxPool2d(3),
+            nn.Dropout(),
+
+            nn.Conv2d(512, 512, 3),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(3),
             nn.Dropout(),
         )
         self.avgpool = nn.AdaptiveAvgPool2d((7, 7))
         self.linear_layers = nn.Sequential(
-            nn.Linear(512 * 7 * 7, self.n_class),
+            nn.Linear(512 * 7 * 7, 4096),
+            nn.ReLU(inplace=True),
+            nn.Dropout(),
+            nn.Linear(4096, self.n_class),
         )
 
     def forward(self, x):
@@ -92,16 +103,13 @@ def calc_loss(output, labels, criterion):
     labels = labels.view(labels.size(0))
     return criterion(output, labels)
 
+
 def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device: %s" % device)
 
-    dataset = TrafficDataset()
-    train_data, test_data, eval_data = dataset.split()
-
-    train_loader = DataLoader(train_data, batch_size=1)
-    eval_loader = DataLoader(eval_data, batch_size=1)
-    test_loader = DataLoader(test_data, batch_size=1)
+    dataset = TrafficDataset(size=2639)
+    train_and_test_data, eval_data = dataset.split(ratio=0.9)
 
     name = 'net_1'
     net = Net().to(device)
@@ -109,13 +117,17 @@ def main():
     optimizer = torch.optim.Adam(net.parameters(), 1e-3, weight_decay=1e-5)
 
     print('\nStart training')
-    for epoch in range(40):
+    for epoch in range(10):
         print('-----------------Epoch = %d-----------------' % (epoch+1))
+        train_data, test_data = train_and_test_data.split(ratio=0.85)
+        train_loader = DataLoader(train_data, batch_size=4)
+        test_loader = DataLoader(test_data, batch_size=1)
         train(train_loader, net, criterion, optimizer, device, epoch+1)
-        test(eval_loader, net, criterion, device)
+        test(test_loader, net, criterion, device)
 
     print('\nFinished Training, Testing on test set')
-    test(test_loader, net, criterion, device)
+    eval_loader = DataLoader(eval_data, batch_size=1)
+    test(eval_loader, net, criterion, device)
 
     torch.save(net.state_dict(), './models/model_{}.pth'.format(name))
 

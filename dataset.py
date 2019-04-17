@@ -8,6 +8,7 @@ from collections import defaultdict
 
 
 N_CLASS = 2
+IM_DIM = (288, 512)
 
 
 class TrafficDataset(Dataset):
@@ -25,6 +26,7 @@ class TrafficDataset(Dataset):
                 imfile = "./data/%s/im_%s" % tuple(im_id.split("_"))
 
                 im = cv2.imread(imfile)
+                im = cv2.resize(im, IM_DIM)
                 im = np.asarray(im).astype("f").transpose(2, 0, 1)
                 all_ims[im_id.split("_")[0]].append(np.copy(im))
 
@@ -47,8 +49,7 @@ class TrafficDataset(Dataset):
         self.data = []
         for data in init_data:
             im, label, imfile = data
-            normalized = (im - avg_imgs[imfile.split("/")[2]])
-            normalized = normalized / (normalized.max() - normalized.min() / 2) - 1.0
+            normalized = (im - avg_imgs[imfile.split("/")[2]]) / 255
             self.data.append((normalized, label, imfile))
 
     def __len__(self):
@@ -61,12 +62,10 @@ class TrafficDataset(Dataset):
         label = torch.LongTensor(torch.argmax(label, dim=0))
         return im, label
 
-    def split(self, train_size=0.8, test_size=0.15):
-        """Split Dataset into 3 Datasets, for train, test and validation"""
+    def split(self, ratio=0.5):
+        """Shuffle and split Dataset into 2"""
         random.shuffle(self.data)
-        train_cutoff = int(len(self.data) * train_size)
-        test_cutoff = train_cutoff + int(len(self.data) * test_size)
+        cutoff = int(len(self.data) * ratio)
         return (
-            TrafficDataset(self.data[:train_cutoff]),
-            TrafficDataset(self.data[train_cutoff:test_cutoff]),
-            TrafficDataset(self.data[test_cutoff:]))
+            TrafficDataset(self.data[:cutoff]),
+            TrafficDataset(self.data[cutoff:]))
