@@ -7,7 +7,7 @@ from torch.utils.data.dataset import Dataset
 from collections import defaultdict
 
 
-N_CLASS = 2
+N_CLASS = 3
 IM_DIM = (288, 512)
 
 

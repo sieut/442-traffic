@@ -1,0 +1,55 @@
+LAYERS
+
+Conv 128
+Maxpool
+Conv 128
+Conv 128
+Maxpool
+
+Conv 512
+Conv 512
+Conv 512
+Maxpool
+
+Linear 4096
+Linear n_class
+
+-----------------Epoch = 1-----------------
+[epoch 1] loss: 0.333 elapsed time 475.054
+0.4438554095286949
+-----------------Epoch = 2-----------------
+[epoch 2] loss: 0.096 elapsed time 473.912
+0.4600306364501558
+-----------------Epoch = 3-----------------
+[epoch 3] loss: 0.636 elapsed time 473.615
+0.3821017077657021
+-----------------Epoch = 4-----------------
+[epoch 4] loss: 0.258 elapsed time 473.820
+0.29218421930692445
+-----------------Epoch = 5-----------------
+[epoch 5] loss: 0.398 elapsed time 472.560
+0.33076688805882004
+-----------------Epoch = 6-----------------
+[epoch 6] loss: 0.055 elapsed time 470.531
+0.2467029109722426
+-----------------Epoch = 7-----------------
+[epoch 7] loss: 0.592 elapsed time 470.880
+0.23358357294934803
+-----------------Epoch = 8-----------------
+[epoch 8] loss: 0.174 elapsed time 471.237
+0.2345270658073639
+-----------------Epoch = 9-----------------
+[epoch 9] loss: 0.112 elapsed time 470.568
+0.2584470950421833
+-----------------Epoch = 10-----------------
+[epoch 10] loss: 0.533 elapsed time 470.229
+0.20945111100747138
+
+Finished Training, Testing on test set
+0.2808632401354385
+
+Calculating score on train and test set
+0.9044210526315789
+
+Calculating score on eval set
+0.8787878787878788

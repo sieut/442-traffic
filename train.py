@@ -14,17 +14,17 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, models, transforms
 from tqdm import tqdm
 
-from dataset import TrafficDataset
+import dataset
 
 
-N_CLASS = 2
+N_CLASS = 3
 OUT_FILE = None
 
 
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.n_class = N_CLASS
+        self.n_class = dataset.N_CLASS
         self.conv_layers = nn.Sequential(
             nn.Conv2d(3, 128, 3),
             nn.BatchNorm2d(128),
@@ -40,6 +40,17 @@ class Net(nn.Module):
             nn.MaxPool2d(2, stride=2),
 
             nn.Conv2d(128, 512, 3),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, 512, 3),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(512, 512, 3),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2, stride=2),
+
+            nn.Conv2d(512, 512, 3),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
             nn.Conv2d(512, 512, 3),
@@ -140,13 +151,13 @@ def main(argv):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device: %s" % device)
 
-    dataset = TrafficDataset(size=2639)
-    train_and_test_data, eval_data = dataset.split(ratio=0.9)
+    data = dataset.TrafficDataset(size=2639)
+    train_and_test_data, eval_data = data.split(ratio=0.9)
 
-    name = 'net_2'
+    name = 'net_3'
     net = Net().to(device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(net.parameters(), 1e-3, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(net.parameters(), 1e-4, weight_decay=1e-5)
 
     global OUT_FILE
     OUT_FILE = open("train_out", "w")
